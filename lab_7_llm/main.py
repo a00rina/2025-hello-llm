@@ -6,7 +6,8 @@ Working with Large Language Models.
 
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from typing import Iterable, Sequence
-import pandas
+import pandas as pd
+from datasets import load_dataset
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -22,6 +23,10 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset(self._hf_name, split='test').to_pandas()
+
+        if not isinstance(self._raw_data, pd.DataFrame):
+            raise TypeError('The downloaded dataset is not pd.DataFrame')
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
