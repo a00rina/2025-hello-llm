@@ -65,6 +65,12 @@ def main() -> None:
     result = evaluator.run()
     print(result)
 
+    # num_samples = 100
+    # fine_tune_samples = batch * fine_tuning_steps
+    # dataset = TokenizedTaskDataset(preprocessor.data.loc[
+    #         num_samples : num_samples + fine_tune_samples
+    #     ])
+
     assert result is not None, "Demo does not work correctly"
 
 

@@ -142,6 +142,18 @@ def tokenize_sample(
     Returns:
         dict[str, torch.Tensor]: Tokenized sample
     """
+    tokens = tokenizer(
+        sample[ColumnNames.SOURCE],
+        padding="max_length",
+        truncation=True,
+        max_length=120
+    )
+
+    return {
+        "input_ids": tokens["input_ids"],
+        "attention_mask": tokens["attention_mask"],
+        "labels": int(sample[ColumnNames.TARGET])
+        }
 
 
 class TokenizedTaskDataset(Dataset):
@@ -159,6 +171,9 @@ class TokenizedTaskDataset(Dataset):
                 tokenize the dataset
             max_length (int): max length of a sequence
         """
+        self._data = data.apply(
+                lambda sample: tokenize_sample(sample, tokenizer, max_length),
+                axis=1)
 
     def __len__(self) -> int:
         """
@@ -167,6 +182,7 @@ class TokenizedTaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
         """
@@ -178,6 +194,7 @@ class TokenizedTaskDataset(Dataset):
         Returns:
             dict[str, torch.Tensor]: An element from the dataset
         """
+        return self._data[index]
 
 
 class LLMPipeline(AbstractLLMPipeline):
