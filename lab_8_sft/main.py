@@ -75,7 +75,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = self._raw_data[["label", "comment_text"]]
+        self._data = self._raw_data[["comment_text", "label"]]
         self._data = self._data.rename(
             columns={"comment_text": ColumnNames.SOURCE, "label": ColumnNames.TARGET}
         ).reset_index(drop=True)
@@ -142,8 +142,6 @@ def tokenize_sample(
     Returns:
         dict[str, torch.Tensor]: Tokenized sample
     """
-
-
 
 
 class TokenizedTaskDataset(Dataset):
@@ -279,7 +277,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if self._model is None:
             return []
-        
+
         predictions = []
 
         samples = [str(sample[0]) for sample in sample_batch]
@@ -329,7 +327,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             result[str(metric)] = metric_evaluate.compute(
                 predictions=data[ColumnNames.PREDICTION.value].tolist(),
                 references=data[ColumnNames.TARGET.value].tolist(),
-                average="micro"
+                average="micro",
             )
         return result
 

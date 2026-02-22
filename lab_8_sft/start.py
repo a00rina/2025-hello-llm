@@ -4,8 +4,6 @@ Fine-tuning starter.
 
 from pathlib import Path
 
-# pylint: disable=too-many-locals, undefined-variable, unused-import, too-many-branches, too-many-statements
-
 from core_utils.llm.metrics import Metrics
 from core_utils.project.lab_settings import LabSettings
 from lab_8_sft.main import (
@@ -16,6 +14,8 @@ from lab_8_sft.main import (
     TaskDataset,
     TaskEvaluator,
 )
+
+# pylint: disable=too-many-locals, undefined-variable, unused-import, too-many-branches, too-many-statements
 
 
 @report_time
