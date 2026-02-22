@@ -4,8 +4,8 @@ Laboratory work.
 Fine-tuning Large Language Models for a downstream task.
 """
 
-from pathlib import Path
 # pylint: disable=too-few-public-methods, undefined-variable, duplicate-code, unused-argument, too-many-arguments
+from pathlib import Path
 from typing import Callable, Iterable, Sequence
 
 import evaluate
@@ -38,7 +38,9 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         Import dataset.
         """
-        self._raw_data = load_dataset(self._hf_name, split="validation", revision="refs/convert/parquet").to_pandas()
+        self._raw_data = load_dataset(
+            self._hf_name, split="validation", revision="refs/convert/parquet"
+        ).to_pandas()
 
         if not isinstance(self._raw_data, pd.DataFrame):
             raise TypeError("The downloaded dataset is not pd.DataFrame")
@@ -67,7 +69,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_sample_min_len": int(lengths.min()),
             "dataset_sample_max_len": int(lengths.max()),
         }
-
 
     @report_time
     def transform(self) -> None:
@@ -263,7 +264,6 @@ class LLMPipeline(AbstractLLMPipeline):
             predictions.extend(self._infer_batch(batch[0]))
         return pd.DataFrame({"target": targets, "predictions": predictions})
 
-
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
         """
@@ -277,17 +277,17 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if self._model is None:
             return []
-        
+
         predictions = []
 
         samples = [sample[0] for sample in sample_batch]
 
         ids = self._tokenizer(
             samples,
-            return_tensors='pt',
+            return_tensors="pt",
             truncation=True,
             padding="max_length",
-            max_length=self._max_length
+            max_length=self._max_length,
         ).to(self._device)
         ids = {k: v.to(self._device) for k, v in ids.items()}
         output = self._model(**ids).logits
@@ -322,8 +322,10 @@ class TaskEvaluator(AbstractTaskEvaluator):
 
         for metric in self._metrics:
             metric_evaluate = evaluate.load(str(metric))
-            result[str(metric)] = metric_evaluate.compute(predictions=data[ColumnNames.PREDICTION.value].tolist(),
-                                                           references=data[ColumnNames.TARGET.value].tolist())
+            result[str(metric)] = metric_evaluate.compute(
+                predictions=data[ColumnNames.PREDICTION.value].tolist(),
+                references=data[ColumnNames.TARGET.value].tolist(),
+            )
         return result
 
 
