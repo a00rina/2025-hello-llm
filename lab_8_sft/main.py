@@ -288,10 +288,11 @@ class LLMPipeline(AbstractLLMPipeline):
             truncation=True,
             padding="max_length",
             max_length=self._max_length,
-        ).to(self._device)
+        )
         ids = {k: v.to(self._device) for k, v in ids.items()}
         output = self._model(**ids).logits
         predictions.extend(list(torch.argmax(output, dim=-1)))
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
