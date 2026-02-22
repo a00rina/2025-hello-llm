@@ -6,7 +6,7 @@ from pathlib import Path
 
 from core_utils.llm.metrics import Metrics
 from core_utils.project.lab_settings import LabSettings
-from lab_7_llm.main import (
+from lab_8_sft.main import (
     LLMPipeline,
     RawDataImporter,
     RawDataPreprocessor,

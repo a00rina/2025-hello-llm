@@ -13,6 +13,7 @@ import pandas as pd
 import torch
 from datasets import load_dataset
 from pandas import DataFrame
+from peft import get_peft_model, LoraConfig, PeftConfig
 from torch.utils.data import DataLoader, Dataset
 from torchinfo import summary
 from transformers import AutoTokenizer, BertForSequenceClassification
@@ -63,8 +64,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_columns": len(self._raw_data.columns),
             "dataset_duplicates": int(self._raw_data.duplicated().sum()),
             "dataset_empty_rows": int(self._raw_data.isna().any(axis=1).sum()),
-            "dataset_sample_min_len": int(lengths.min().min()),
-            "dataset_sample_max_len": int(lengths.max().max()),
+            "dataset_sample_min_len": int(lengths.min()),
+            "dataset_sample_max_len": int(lengths.max()),
         }
 
 
@@ -254,6 +255,14 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        predictions = []
+        targets = []
+
+        for batch in DataLoader(dataset=self._dataset, batch_size=self._batch_size):
+            targets.extend(batch[1])
+            predictions.extend(self._infer_batch(batch[0]))
+        return pd.DataFrame({"target": targets, "predictions": predictions})
+
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -266,6 +275,23 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: model predictions as strings
         """
+        if self._model is None:
+            return []
+        
+        predictions = []
+
+        samples = [sample[0] for sample in sample_batch]
+
+        ids = self._tokenizer(
+            samples,
+            return_tensors='pt',
+            truncation=True,
+            padding="max_length",
+            max_length=self._max_length
+        ).to(self._device)
+        ids = {k: v.to(self._device) for k, v in ids.items()}
+        output = self._model(**ids).logits
+        predictions.extend(list(torch.argmax(output, dim=-1)))
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -281,6 +307,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        self._data_path = data_path
+        self._metrics = metrics
 
     def run(self) -> dict:
         """
@@ -289,6 +317,14 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict: A dictionary containing information about the calculated metric
         """
+        data = pd.read_csv(self._data_path)
+        result = {}
+
+        for metric in self._metrics:
+            metric_evaluate = evaluate.load(str(metric))
+            result[str(metric)] = metric_evaluate.compute(predictions=data[ColumnNames.PREDICTION.value].tolist(),
+                                                           references=data[ColumnNames.TARGET.value].tolist())
+        return result
 
 
 class SFTPipeline(AbstractSFTPipeline):
