@@ -77,7 +77,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = self._raw_data[["label", "comment_text"]]
         self._data = self._data.rename(
-            columns={"label": ColumnNames.TARGET, "comment_text": ColumnNames.SOURCE}
+            columns={"comment_text": ColumnNames.SOURCE, "label": ColumnNames.TARGET}
         ).reset_index(drop=True)
 
 
@@ -142,6 +142,7 @@ def tokenize_sample(
     Returns:
         dict[str, torch.Tensor]: Tokenized sample
     """
+
 
 
 
@@ -328,6 +329,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             result[str(metric)] = metric_evaluate.compute(
                 predictions=data[ColumnNames.PREDICTION.value].tolist(),
                 references=data[ColumnNames.TARGET.value].tolist(),
+                average="micro"
             )
         return result
 

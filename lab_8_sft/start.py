@@ -5,8 +5,6 @@ Fine-tuning starter.
 from pathlib import Path
 
 # pylint: disable=too-many-locals, undefined-variable, unused-import, too-many-branches, too-many-statements
-from datasets import load_dataset
-from transformers import AutoTokenizer, BertForSequenceClassification
 
 from core_utils.llm.metrics import Metrics
 from core_utils.project.lab_settings import LabSettings
@@ -25,8 +23,6 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
-    model = BertForSequenceClassification.from_pretrained("cointegrated/rubert-tiny-toxicity")
-    print(model)
     current_path = Path(__file__).parent
     settings = LabSettings(current_path / "settings.json")
 
