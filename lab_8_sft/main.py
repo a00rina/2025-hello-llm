@@ -339,8 +339,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
         for metric in self._metrics:
             metric_evaluate = evaluate.load(str(metric))
             computed_metrics = metric_evaluate.compute(
-                predictions=data[ColumnNames.PREDICTION].tolist(),
-                references=data[ColumnNames.TARGET].tolist(),
+                predictions=data[ColumnNames.PREDICTION.value].tolist(),
+                references=data[ColumnNames.TARGET.value].tolist(),
             )
             result[str(metric)] = list(computed_metrics.values()[0])
         return result
