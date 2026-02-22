@@ -295,8 +295,6 @@ class LLMPipeline(AbstractLLMPipeline):
         if self._model is None:
             return []
 
-        predictions = []
-
         samples = [str(sample[0]) for sample in sample_batch]
 
         ids = self._tokenizer(
@@ -308,9 +306,8 @@ class LLMPipeline(AbstractLLMPipeline):
         )
         ids = {k: v.to(self._device) for k, v in ids.items()}
         output = self._model(**ids).logits
-        predictions.extend(list(torch.argmax(output, dim=-1)))
-        return predictions
-        # return [str(p.item()) for p in predictions]
+        predictions = torch.argmax(output, dim=-1)
+        return [str(p.item()) for p in predictions]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
