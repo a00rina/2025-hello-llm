@@ -12,10 +12,10 @@ from lab_8_sft.main import (
     LLMPipeline,
     RawDataImporter,
     RawDataPreprocessor,
+    SFTPipeline,
     TaskDataset,
     TaskEvaluator,
     TokenizedTaskDataset,
-    SFTPipeline,
 )
 
 # pylint: disable=too-many-locals, undefined-variable, unused-import, too-many-branches, too-many-statements
@@ -66,7 +66,7 @@ def main() -> None:
     result = evaluator.run()
     print(result)
 
-    finetuned_model_path = Path(__file__).parent / 'dist'/ f'{settings.parameters.model}_finetuned'
+    finetuned_model_path = Path(__file__).parent / "dist" / f"{settings.parameters.model}_finetuned"
     tokenizer = AutoTokenizer.from_pretrained(settings.parameters.model)
 
     sft_params = SFTParams(
@@ -82,13 +82,13 @@ def main() -> None:
 
     num_samples = 100
     fine_tune_samples = sft_params.batch_size * sft_params.max_fine_tuning_steps
-    dataset = TokenizedTaskDataset(preprocessor.data.loc[
-            num_samples : num_samples + fine_tune_samples
-        ], tokenizer, 120)
+    dataset = TokenizedTaskDataset(
+        preprocessor.data.loc[num_samples : num_samples + fine_tune_samples], tokenizer, 120
+    )
 
     pipeline = SFTPipeline(settings.parameters.model, dataset, sft_params)
     pipeline.run()
-    
+
     assert result is not None, "Demo does not work correctly"
 
 

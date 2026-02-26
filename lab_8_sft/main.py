@@ -171,9 +171,9 @@ class TokenizedTaskDataset(Dataset):
                 tokenize the dataset
             max_length (int): max length of a sequence
         """
-        self._data = list(data.apply(
-            lambda sample: tokenize_sample(sample, tokenizer, max_length), axis=1
-        ))
+        self._data = list(
+            data.apply(lambda sample: tokenize_sample(sample, tokenizer, max_length), axis=1)
+        )
 
     def __len__(self) -> int:
         """
@@ -367,8 +367,9 @@ class SFTPipeline(AbstractSFTPipeline):
         """
         super().__init__(model_name, dataset, data_collator)
         self._sft_params = sft_params
-        self._model = BertForSequenceClassification.from_pretrained(model_name, 
-                            problem_type="single_label_classification", num_labels=5)
+        self._model = BertForSequenceClassification.from_pretrained(
+            model_name, problem_type="single_label_classification", num_labels=5
+        )
         self._lora_config = LoraConfig(
             r=sft_params.rank,
             lora_alpha=sft_params.alpha,
