@@ -63,7 +63,7 @@ def init_application() -> tuple:
     return sft_app, base_pipeline, finetuned_pipeline
 
 
-app, base, sft = init_application()
+app, pre_trained_pipeline, fine_tuned_pipeline = init_application()
 app.mount("/assets", StaticFiles(directory=ASSETS_FOLDER), name="assets")
 templates = Jinja2Templates(directory=ASSETS_FOLDER)
 
@@ -82,9 +82,9 @@ async def infer(query: Query) -> dict:
     Inference model with input query.
     """
     if query.use_base_model:
-        pipeline = base
+        pipeline = pre_trained_pipeline
     else:
-        pipeline = sft
+        pipeline = fine_tuned_pipeline
 
     sample = (query.question,)
     result = pipeline.infer_sample(sample)
